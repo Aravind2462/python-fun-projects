@@ -227,7 +227,11 @@ def main():
         # raw_data = df['RAW']
 
         # Test Signal
-        signal_2hz = Signal(amplitude=5, frequency=2, sampling_rate=my_sampling_rate, duration=my_duration)
+
+        signal_1hz = Signal(amplitude=5, frequency=1, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_1hz = signal_1hz.sine()
+
+        signal_2hz = Signal(amplitude=3, frequency=2, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_2hz = signal_2hz.sine()
         # df['sine_20hz'] = pd.Series(sine_10hz)
 
@@ -245,7 +249,7 @@ def main():
 
         # df['sine_80hz'] = pd.Series(sine_200hz)
 
-        raw_data = sine_2hz + sine_200hz + sine_100hz + sine_10hz + sine_5hz
+        raw_data = sine_1hz + sine_2hz + sine_200hz + sine_100hz + sine_10hz + sine_5hz
         # df['combined signal'] = pd.Series(raw_data)
 
         # Save the DataFrame back to the same Excel file, overwriting it
@@ -271,7 +275,7 @@ def main():
         N, beta = kaiserord(ripple_db, width)
 
         # The cutoff frequency of the filter.
-        cutoff_hz = 1.0
+        cutoff_hz = 0.01
 
         # Use firwin with a Kaiser window to create a lowpass FIR filter.
         taps = firwin(N, cutoff_hz/nyq_rate, window=('kaiser', beta))
