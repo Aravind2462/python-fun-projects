@@ -2,12 +2,11 @@
 import numpy as np
 from scipy.fft import fft, rfft
 from scipy.fft import fftfreq, rfftfreq
-
+from scipy.signal import kaiserord, lfilter, firwin, freqz , convolve
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import matplotlib.pyplot as plt
 import pandas as pd
-from scipy.signal import firwin, convolve, lfilter
 import sys
 import os
 
@@ -222,23 +221,82 @@ def main():
         excel_dir = sys.argv[1]
         print(f"Reading: {excel_dir}")
         df = pd.read_excel(excel_dir)
+        my_sampling_rate = 1000
+        my_duration = 10
         # Extract raw data from the excel file.
         # raw_data = df['RAW']
 
         # Test Signal
-        signal_20hz = Signal(amplitude=1, frequency=20, sampling_rate=1200, duration=2)
-        sine_20hz = signal_20hz.sine()
-        signal_80hz = Signal(amplitude=0.3, frequency=80, sampling_rate=1200, duration=2)
-        sine_80hz = signal_80hz.sine()
-        raw_data = sine_20hz + sine_80hz
+        signal_2hz = Signal(amplitude=5, frequency=2, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_2hz = signal_2hz.sine()
+        # df['sine_20hz'] = pd.Series(sine_10hz)
+
+        signal_200hz = Signal(amplitude=2, frequency=200, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_200hz = signal_200hz.sine()
+
+        signal_100hz = Signal(amplitude=3, frequency=100, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_100hz = signal_100hz.sine()
+
+        signal_10hz = Signal(amplitude=3, frequency=10, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_10hz = signal_10hz.sine()
+
+        signal_5hz = Signal(amplitude=3, frequency=5, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_5hz = signal_5hz.sine()
+
+        # df['sine_80hz'] = pd.Series(sine_200hz)
+
+        raw_data = sine_2hz + sine_200hz + sine_100hz + sine_10hz + sine_5hz
+        # df['combined signal'] = pd.Series(raw_data)
+
+        # Save the DataFrame back to the same Excel file, overwriting it
+        # df.to_excel(f"{excel_dir}", index=True)
 
         # Apply the DFT using the class Fourier
-        fourier = Fourier(raw_data, sampling_rate=1200)
+        fourier = Fourier(raw_data, sampling_rate=my_sampling_rate)
         # Plot the spectrum interactively using the class Fourier
         fourier.plot_time_frequency()
+
+        # The Nyquist rate of the signal.
+        nyq_rate = my_sampling_rate / 2.0
+
+        # The desired width of the transition from pass to stop,
+        # relative to the Nyquist rate.  We'll design the filter
+        # with a 5 Hz transition width.
+        width = 1.0/nyq_rate
+
+        # The desired attenuation in the stop band, in dB.
+        ripple_db = 10.0
+
+        # Compute the order and Kaiser parameter for the FIR filter.
+        N, beta = kaiserord(ripple_db, width)
+
+        # The cutoff frequency of the filter.
+        cutoff_hz = 1.0
+
+        # Use firwin with a Kaiser window to create a lowpass FIR filter.
+        taps = firwin(N, cutoff_hz/nyq_rate, window=('kaiser', beta))
+
+        print("coefficient\n")
+        print(taps)
+        print("\n")
+
+        # Use lfilter to filter x with the FIR filter.
+        filtered_raw_data = lfilter(taps, 1.0, raw_data)
+
+        filtered_fourier = Fourier(filtered_raw_data, sampling_rate=my_sampling_rate)
+        filtered_fourier.plot_time_frequency()
+        
     else:
        print("pass the file name...")
 
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
+
+
+
