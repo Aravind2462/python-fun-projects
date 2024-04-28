@@ -221,7 +221,7 @@ def main():
         excel_dir = sys.argv[1]
         print(f"Reading: {excel_dir}")
         df = pd.read_excel(excel_dir)
-        my_sampling_rate = 1000
+        my_sampling_rate = 240
         my_duration = 10
         # Extract raw data from the excel file.
         raw_data = df['RAW']
@@ -235,13 +235,13 @@ def main():
         sine_2hz = signal_2hz.sine()
         df['sine_2hz'] = pd.Series(sine_2hz)
 
-        signal_200hz = Signal(amplitude=2, frequency=200, sampling_rate=my_sampling_rate, duration=my_duration)
-        sine_200hz = signal_200hz.sine()
-        df['sine_200hz'] = pd.Series(sine_200hz)
+        signal_20hz = Signal(amplitude=2, frequency=20, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_20hz = signal_20hz.sine()
+        df['sine_20hz'] = pd.Series(sine_20hz)
 
-        signal_100hz = Signal(amplitude=3, frequency=100, sampling_rate=my_sampling_rate, duration=my_duration)
-        sine_100hz = signal_100hz.sine()
-        df['sine_100hz'] = pd.Series(sine_100hz)
+        signal_50hz = Signal(amplitude=3, frequency=50, sampling_rate=my_sampling_rate, duration=my_duration)
+        sine_50hz = signal_50hz.sine()
+        df['sine_50hz'] = pd.Series(sine_50hz)
 
         signal_10hz = Signal(amplitude=3, frequency=10, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_10hz = signal_10hz.sine()
@@ -251,9 +251,8 @@ def main():
         sine_5hz = signal_5hz.sine()
         df['sine_5hz'] = pd.Series(sine_5hz)
 
-        # df['sine_80hz'] = pd.Series(sine_200hz)
 
-        raw_data = sine_1hz + sine_2hz + sine_200hz + sine_100hz + sine_10hz + sine_5hz
+        raw_data = sine_1hz + sine_2hz + sine_20hz + sine_50hz + sine_10hz + sine_5hz
         df['combined signal'] = pd.Series(raw_data)
 
 
@@ -262,25 +261,31 @@ def main():
         # Plot the spectrum interactively using the class Fourier
         fourier.plot_time_frequency()
 
-        # The Nyquist rate of the signal.
+
+        #### got it form online ####
+
+        # # The Nyquist rate of the signal.
         nyq_rate = my_sampling_rate / 2.0
 
-        # The desired width of the transition from pass to stop,
-        # relative to the Nyquist rate.  We'll design the filter
-        # with a 5 Hz transition width.
+        # # The desired width of the transition from pass to stop,
+        # # relative to the Nyquist rate.  We'll design the filter
+        # # with a 5 Hz transition width.
         width = 1.0/nyq_rate
 
-        # The desired attenuation in the stop band, in dB.
-        ripple_db = 10.0
+        # # The desired attenuation in the stop band, in dB.
+        # ripple_db = 10.0
 
-        # Compute the order and Kaiser parameter for the FIR filter.
-        N, beta = kaiserord(ripple_db, width)
+        # # Compute the order and Kaiser parameter for the FIR filter.
+        # N, beta = kaiserord(ripple_db, width)
 
-        # The cutoff frequency of the filter.
+        # # The cutoff frequency of the filter.
         cutoff_hz = 0.01
 
-        # Use firwin with a Kaiser window to create a lowpass FIR filter.
-        taps = firwin(N, cutoff_hz/nyq_rate, window=('kaiser', beta))
+        # # Use firwin with a Kaiser window to create a lowpass FIR filter.
+        # taps = firwin(N, cutoff_hz/nyq_rate, window=('kaiser', beta))
+
+        taps = firwin(50, cutoff_hz/nyq_rate, window='boxcar')
+
 
         print("coefficient\n")
         print(taps)
@@ -293,6 +298,7 @@ def main():
         filtered_fourier.plot_time_frequency()
 
         df['filtered_raw_data'] = pd.Series(filtered_raw_data)
+
 
         # Save the DataFrame back to the same Excel file, overwriting it
         df.to_excel(f"{excel_dir}", index=True)
