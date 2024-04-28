@@ -224,36 +224,38 @@ def main():
         my_sampling_rate = 1000
         my_duration = 10
         # Extract raw data from the excel file.
-        # raw_data = df['RAW']
+        raw_data = df['RAW']
 
         # Test Signal
-
         signal_1hz = Signal(amplitude=5, frequency=1, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_1hz = signal_1hz.sine()
+        df['sine_1hz'] = pd.Series(sine_1hz)
 
         signal_2hz = Signal(amplitude=3, frequency=2, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_2hz = signal_2hz.sine()
-        # df['sine_20hz'] = pd.Series(sine_10hz)
+        df['sine_2hz'] = pd.Series(sine_2hz)
 
         signal_200hz = Signal(amplitude=2, frequency=200, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_200hz = signal_200hz.sine()
+        df['sine_200hz'] = pd.Series(sine_200hz)
 
         signal_100hz = Signal(amplitude=3, frequency=100, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_100hz = signal_100hz.sine()
+        df['sine_100hz'] = pd.Series(sine_100hz)
 
         signal_10hz = Signal(amplitude=3, frequency=10, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_10hz = signal_10hz.sine()
+        df['sine_10hz'] = pd.Series(sine_10hz)
 
         signal_5hz = Signal(amplitude=3, frequency=5, sampling_rate=my_sampling_rate, duration=my_duration)
         sine_5hz = signal_5hz.sine()
+        df['sine_5hz'] = pd.Series(sine_5hz)
 
         # df['sine_80hz'] = pd.Series(sine_200hz)
 
         raw_data = sine_1hz + sine_2hz + sine_200hz + sine_100hz + sine_10hz + sine_5hz
-        # df['combined signal'] = pd.Series(raw_data)
+        df['combined signal'] = pd.Series(raw_data)
 
-        # Save the DataFrame back to the same Excel file, overwriting it
-        # df.to_excel(f"{excel_dir}", index=True)
 
         # Apply the DFT using the class Fourier
         fourier = Fourier(raw_data, sampling_rate=my_sampling_rate)
@@ -289,6 +291,11 @@ def main():
 
         filtered_fourier = Fourier(filtered_raw_data, sampling_rate=my_sampling_rate)
         filtered_fourier.plot_time_frequency()
+
+        df['filtered_raw_data'] = pd.Series(filtered_raw_data)
+
+        # Save the DataFrame back to the same Excel file, overwriting it
+        df.to_excel(f"{excel_dir}", index=True)
         
     else:
        print("pass the file name...")
